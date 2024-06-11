@@ -681,7 +681,7 @@ print(x)  # b'\xd0\x9f\xd1\x80\xd0\xb8'
 print(y)  # bytearray(b'\xd0\x9f\xd1\x80\xd0\xb8')                
 ```
 
-# Инфо из лекции 3
+# Инфо из лекции 4
 ## Функции
 
 *Функция — фрагмент программного кода, к которому можно
@@ -701,7 +701,7 @@ print(y)  # bytearray(b'\xd0\x9f\xd1\x80\xd0\xb8')
 *Зарезервированное слово pass ничего не делает*
 ```Python
 if a == 5:
- a += 1
+    a += 1
 else:
  pass
 ```
@@ -869,6 +869,140 @@ func(1, 2, 3)
 * `vars()` Функция без аргументов работает аналогично функции locals(). Если передать в vars объект,
 функция возвращает его атрибут__dict__. А если такого атрибута нет у объекта, вызывает ошибку TypeError.
 
+# Инфо из лекции 5(Итераторы и генераторы)
+## Однострочники
 
+`a, b = b, a`
+```Python
+a = 1
+b = 2
+a, b = b, a
+print(f"{a = }\t{b = }") # a = 2	b = 1
+```
 
+### Распаковка
+*Варианты распаковки значений*
+* `Обычная распаковка - a, b, c = последовательность`
+```Python
+a, b, c = input("Три символа: ")
+print(f'{a=} {b=} {c=}')
+# Три символа: 123
+# a='1' b='2' c='3'
+```
+* `Распаковка с упаковкой - a, *b, c = последовательность`
+```Python
+data = ["1", "3", "4", "6", "9", "2", "10"]
+a, b, c, *d = data
+print(f'{a=} {b=} {c=} {d=}')                                                                        
+# a='1' b='3' c='4' d=['6', '9', '2', '10'] 
 
+data = ["1", "3", "4", "6", "9", "2", "10"]
+a, b, *c, d = data
+print(f'{a=} {b=} {c=} {d=}')
+# a='1' b='3' c=['4', '6', '9', '2'] d='10'
+
+data = ["1", "3", "4", "6", "9", "2", "10"]
+*a, b, c, d = data
+print(f'{a=} {b=} {c=} {d=}')
+# a=['1', '3', '4', '6'] b='9' c='2' d='10'
+```
+* `Распаковка со звёздочкой - *последовательность` 
+
+## Итераторы
+`iter(object[, sentinel])` - Функция принимает на вход object поддерживающий итерацию. 
+Второй параметр функции iter — sentinel передают для вызываемых объектов-итераторов
+
+```Python
+data = [2, 4, 6, 8]
+list_iter = iter(data)
+print(list_iter)
+#<list_iterator object at 0x000001965E851690>
+
+data = [2, 4, 6, 8]
+list_iter = iter(data)
+print(*list_iter)
+print(*list_iter)
+#2 4 6 8
+```
+
+`next(iterator[, default])` - На вход функция принимает итератор, который вернула функция iter. 
+Второй параметр функции next — default нужен для возврата значения по умолчанию вместо выброса исключения StopIteration.
+```Python
+data = [2, 4, 6, 8]
+list_iter = iter(data)
+print(next(list_iter)) # 2
+print(next(list_iter)) # 4
+print(next(list_iter)) # 6
+print(next(list_iter)) # 8
+print(next(list_iter)) # ошибка StopIteration
+
+# второй параметр next
+data = [2, 4, 6, 8]
+list_iter = iter(data)
+print(next(list_iter, 42)) # 2
+print(next(list_iter, 42)) # 4
+print(next(list_iter, 42)) # 6
+print(next(list_iter, 42)) # 8
+print(next(list_iter, 42)) #42
+print(next(list_iter, 42)) # 42
+# в место ошибок выводятся дефолтные значения - 42 
+```
+## Генераторы
+
+**Генераторные выражения** - Генераторные выражения Python позволяют создать собственный генератор, перебирающий значения.
+```Python
+my_gen = (chr(i) for i in range(97, 123))
+print(my_gen)
+for char in my_gen:
+    print(char, end=" ")
+# <generator object <genexpr> at 0x000001A40915DB10>
+# a b c d e f g h i j k l m n o p q r s t u v w x y z 
+```
+
+**List comprehensions** - list_comp = [expression for expr in sequense1 if condition1 ...]
+*Генератор списков формирует list заполненный данным и присваивает его переменной.*
+```Python
+data = [2, 5, 1, 42, 65, 76, 24, 77]
+res = [item for item in data if item % 2 == 0]
+print(f"{res = }") # res = [2, 42, 76, 24]
+```
+
+**Set и dict comprehensions**
+* **Set comprehensions** - set_comp = {expression for expr in sequense1 if condition1 …}
+* **Dict comprehensions** - dict_comp = {key: value for expr in sequense1 if condition1 …}
+* **Сходства и различия** - {используются фигурные скобки для выражения} словарь подставляет ключ и значение через двоеточие
+
+**Команда yield** - Команда yield работает аналогично return. Но вместо завершения функции запоминает её состояние.
+Повторный вызов продолжает код после yield.
+```Python
+def factorial(n):
+    number = 1
+    for i in range(1, n + 1):
+        number *= i
+        yield number
+
+for i, num in enumerate(factorial(5), start=1):
+    print(f"{i}! = {num}")
+# 1! = 1
+# 2! = 2
+# 3! = 6
+# 4! = 24
+# 5! = 120
+```
+
+*Функции iter и next одинаково работают с генераторами «из коробки» и с созданными самостоятельно.*
+```Python
+def factorial(n):
+    number = 1
+    for i in range(1, n + 1):
+        number *= i
+        yield number
+
+my_iter = iter(factorial(4))
+print(my_iter)
+print(next(my_iter)) # 1
+print(next(my_iter)) # 2
+print(next(my_iter)) # 6
+print(next(my_iter)) # 24
+print(next(my_iter)) # StopIteration
+```
