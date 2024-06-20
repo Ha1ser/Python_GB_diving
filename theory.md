@@ -1106,3 +1106,340 @@ print('stop')
 * `randrange(start, stop[, step])` - число из диапазона
 * `shuffle(x)` - перемешиваем коллекцию x in place
 * `sample(population, k, *, counts=None)` - Выборка в k элементов из population
+
+# Инфо из лекции 7(Файлы и файловая система)
+## Файлы
+
+`open()` - В Python для получения доступа файлу используют функцию open()
+```Python
+# пример: 
+open(file, mode='r', buffering=-1,
+encoding=None,
+ errors=None, newline=None, closefd=True,
+opener=None)
+```
+
+## Режимы работы с файлами
+
+* 'r' — открыть для чтения (по умолчанию)
+* 'w' — открыть для записи, предварительно очистив файл
+* 'x' — открыть для эксклюзивного создания. Вернёт ошибку, если файл уже существует
+* 'a' — открыть для записи в конец файла, если он существует
+* 'b' — двоичный режим
+* 't' — текстовый режим (по умолчанию)
+* '+' — открыты для обновления (чтение и запись)
+
+`.close()` - закрывает работу с файлом. Если в коде отсутствует метод close(), то даже при успешном завершении
+программы не гарантируется сохранение всех данных в файле
+
+## Прочие необязательные параметры функции open
+* buffering — определяет режим буферизации
+* errors — используется только в текстовом режиме и определяет поведение в случае ошибок
+кодирования или декодирования
+* newline — отвечает за преобразование окончания строки
+* closefd — указывает оставлять ли файловый дескриптор открытым при закрытии файла
+* opener — позволяет передать пользовательскую функцию для открытия файла
+
+## Менеджер контекста with open 
+```Python
+with open('text_data.txt', 'r+', encoding='utf-8') as f:
+print(list(f))
+```
+* with гарантирует закрытие файла и сохранение информации
+
+## Чтение файла
+1. `list(f)` - Чтение в список
+```Python
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    print(list(f)) # ['Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил, упражнений и учебных текстов. Для этого созданы другие замечательные учебники.']
+```
+2. `res = f.read()` - Чтение методом read
+```Python
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    res = f.read()
+    print(f'Читаем первый раз\n{res}')
+    res = f.read()
+    print(f'Читаем второй раз\n{res}')
+# Читаем первый раз
+# Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил, упражнений и учебных текстов. Для этого созданы другие замечательные учебники.
+# Читаем второй раз
+# 
+#
+```
+```Python
+# выводит по 50 символов, задействуется меньше оперативной памяти
+size = 50
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    while res := f.read(size):
+        print(res) 
+# Эта книга адресована всем, кто изучает русский язы
+# к. Но состоит она не из правил, упражнений и учебн
+# ых текстов. Для этого созданы другие замечательные
+#  учебники.
+```
+3. `res = f.readline()` - Чтение методом readline
+```Python
+# между каждой строкой есть пустая строка это делает .readline()
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    while res := f.readline():
+        print(res)
+# Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил,
+# 
+# упражнений и учебных текстов. Для этого созданы другие замечательные учебники.
+```
+```Python
+size = 50
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    while res := f.readline(size):
+        print(res)
+# Эта книга адресована всем, кто изучает русский язы
+# к. Но состоит она не из правил,
+# 
+# упражнений и учебных текстов. Для этого созданы др
+# угие замечательные учебники.                                                
+```
+4. `for line in f:` - Чтение циклом for
+```Python
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    for line in f:
+        print(line, end='')
+# Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил,
+# упражнений и учебных текстов. Для этого созданы другие замечательные учебники.
+```
+```Python
+size = 50
+with open("qwerty.txt", 'r', encoding='utf-8') as f:
+    for line in f:
+        print(line[:-1])
+        print(line.replace('\n', ''))                                                                            
+# Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил,
+# Эта книга адресована всем, кто изучает русский язык. Но состоит она не из правил,
+# упражнений и учебных текстов. Для этого созданы другие замечательные учебники
+# упражнений и учебных текстов. Для этого созданы другие замечательные учебники.
+```
+## Запись и добавление в файл
+* w - создаём новый пустой файл для записи. Если файл существует, открываем его для записи и удаляем данные, которые в нём
+хранились
+* x - создаём новый пустой файл для записи. Если файл существует, вызываем ошибку
+* a - открываем существующий файл для записи в конец, добавления данных. Если файл не существует, создаём новый файл
+и записываем в него
+
+* `res = f.write(text)` - Запись методом write
+```Python
+text = "this text will add"
+with open("qwerty.txt", 'a', encoding='utf-8') as f:
+    res = f.write(text)
+    print(f'{res = }\n{len(text) = }')
+# res = 18
+# len(text) = 18
+# фраза добавилась в конец файла
+```
+```Python
+text = ['abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz']
+with open("qwerty.txt", 'a', encoding='utf-8') as f:
+    for line in text:
+        res = f.write(f'{line}\n')
+        print(f'{res = }\n{len(text) = }')
+# res = 27
+# len(text) = 3
+# res = 27
+# len(text) = 3
+# res = 27
+# len(text) = 3
+# в файл запишется текст в 3 строки благодаря \n в res 
+``` 
+* `f.writelines('\n'.join(text))` - Запись методом writelines
+```Python
+text = ['abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz']
+with open("qwerty.txt", 'a', encoding='utf-8') as f:
+    f.writelines('\n'.join(text))
+# .writelines добавил построчно каждый элемент в файл.
+```
+* `print(text, file=f)` - print в файл
+```Python
+text = ['abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz']
+with open("qwerty.txt", 'a', encoding='utf-8') as f:
+    for line in text:
+        print(line, file=f)
+# print(line, file=f) добавляет список в файл построчно каждый элемент и в конце добавляет одну пустую строку
+```
+```Python
+text = ['abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz',
+        'abcdifghijklmnopqrstuvwxyz']
+with open("qwerty.txt", 'a', encoding='utf-8') as f:
+    for line in text:
+        print(line, end='***\n##', file=f)
+# в конце каждой строки будут ***, а в начале ##
+```
+
+## Методы перемещения в файле
+* `f.tell()` - Метод tell возвращает текущую позицию в файле
+* `seek(offset, whence=0)` - **offset** — смещение относительно опорной точки, **whence** — способ выбора опороной точки.
+  * whence=0 — отсчёт от начала файла
+  * whence=1 — отсчёт от текущей позиции в файле
+  * whence=2 — отсчёт от конца файла
+* `truncate(size=None)` - Метод изменяет размер файла. Если не передать значение в параметр size будет удалена
+часть файла от текущей позиции до конца
+
+# Файловая система
+## Работа с каталогами
+* Определить текущий каталог
+```Python
+import os
+from pathlib import Path
+
+print(os.getcwd()) # C:\Users\User\Desktop\Python_GB_diving
+print(Path.cwd()) # C:\Users\User\Desktop\Python_GB_diving
+# получили инфу о директории в которой находимся.
+```
+```Python
+import os
+from pathlib import Path
+print(os.getcwd())
+print(Path.cwd())
+os.chdir('../..')
+print(os.getcwd())
+print(Path.cwd())
+# C:\Users\User\Desktop\Python_GB_diving
+# C:\Users\User\Desktop\Python_GB_diving
+# C:\Users\User
+# C:\Users\User
+```
+* Создать новый каталог
+```Python
+import os
+from pathlib import Path
+
+os.mkdir('new_os_dir') # создается папка 'new_os_dir'
+Path('new_path_dir').mkdir() # создается папка 'new_path_dir'
+```
+```Python
+import os
+from pathlib import Path
+os.makedirs('dir/other_dir/new_os_dir') # создался каталог 'dir/other_dir/new_os_dir'
+Path('some_dir/dir/new_path_dir').mkdir() # FileNotFoundError
+Path('some_dir/dir/new_path_dir').mkdir(parents=True) # создался каталог 'some_dir/dir/new_path_dir'
+```
+* Удалить существующий каталог
+```Python
+import os
+from pathlib import Path
+# os.rmdir('dir') # OSError
+# Path('some_dir').rmdir() # OSError
+os.rmdir('dir/other_dir/new_os_dir') # удаляем папку new_os_dir
+Path('some_dir/dir/new_path_dir').rmdir()  # удаляем папку new_path_dir
+# Удалить можно лишь пустой каталог. Если внутри удаляемого
+# каталога есть другие каталоги или файлы, возникнет ошибка OSError. 
+```
+```Python
+import shutil
+shutil.rmtree('dir/other_dir') # удалился каталог dir
+shutil.rmtree('some_dir') # удалился каталог some_dir 
+```
+* Формирование пути
+```Python
+import os
+from pathlib import Path
+file_1 = os.path.join(os.getcwd(), 'dir', 'new_file.txt')
+print(f'{file_1 = }\n{file_1}')
+file_2 = Path().cwd() / 'dir' / 'new_file.txt'
+print(f'{file_2 = }\n{file_2}')
+```
+
+## Чтение данных о каталогах
+* Получение списка каталогов и файлов
+```Python
+import os
+from pathlib import Path
+
+print(os.listdir())
+p = Path(Path().cwd())
+for obj in p.iterdir():
+    print(obj)
+```
+* Проверка на директорию, файл и ссылку
+```Python
+import os
+from pathlib import Path
+
+dir_list = os.listdir()
+for obj in dir_list:
+    print(f'{os.path.isdir(obj) = }', end='\t')
+    print(f'{os.path.isfile(obj) = }', end='\t')
+    print(f'{os.path.islink(obj) = }', end='\t')
+    print(f'{obj = }')
+    
+p = Path(Path().cwd())
+for obj in p.iterdir():
+    print(f'{obj.is_dir() = }', end='\t')
+    print(f'{obj.is_file() = }', end='\t')
+    print(f'{obj.is_symlink() = }', end='\t')
+    print(f'{obj = }')
+# os.path.isdir(obj) = True	os.path.isfile(obj) = False	os.path.islink(obj) = False	obj = '.fold'
+# os.path.isdir(obj) = True	os.path.isfile(obj) = False	os.path.islink(obj) = False	obj = '.git'
+# os.path.isdir(obj) = False	os.path.isfile(obj) = True	os.path.islink(obj) = False	obj = '.gitignore'
+# os.path.isdir(obj) = True	os.path.isfile(obj) = False	os.path.islink(obj) = False	obj = '.idea'
+# ...
+```
+* Обход папок через os.walk()
+```Python
+import os
+for dir_path, dir_name, file_name in os.walk(os.getcwd()):
+    print(f'{dir_path = }\n{dir_name = }\n{file_name = }\n')
+```
+
+## Работа с файлами 
+* Переименование файлов 
+```python
+import os
+from pathlib import Path
+
+os.rename('old_name.py', 'new_name.py')
+
+p = Path('old_file.py')
+p.rename('new_file.py')
+# ↕ одно и тоже                                                                                                                       
+Path('new_file.py').rename('newest_file.py')
+```
+* Перемещение файлов
+```python
+import os
+from pathlib import Path
+
+os.replace('newest_file.py', os.path.join(os.getcwd(), 'dir', 'new_name.py')) # переносим файл 'newest_file.py' в каталог 'dir' и меняем название файла на 'new_name.py'
+
+old_file = Path('new_name.py')
+new_file = old_file.replace(Path.cwd() / 'new_os_dir' / old_file) # перемещаем файл new_name.py в папку new_os_dir.
+```
+* Копирование файлов
+```python
+import shutil
+shutil.copy('one.txt', 'dir') # копирование файла 'one.txt' в директорию 'dir', если каталога не существует то имя файла изменится на dir
+shutil.copy2('two.txt', 'dir/one_more.txt') # копирование файла 'two.txt' в директорию 'dir' и изменяется имя файла на one_more.txt
+```
+```python
+import shutil
+import shutil
+
+shutil.rmtree('dir', 'one_more_dir') # копирование директории 'dir' и присвоение имени 'one_more_dir'
+```
+* Удаление файлов
+```python
+import shutil
+
+shutil.rmtree('dir') # удаление директории 'dir'
+```
+```python
+import os
+from pathlib import Path
+os.remove('one_more_dir/one.txt')
+Path('one_more_dir/one_more.txt').unlink()
+```
+
